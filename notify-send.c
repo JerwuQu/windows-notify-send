@@ -1,11 +1,12 @@
 #define _WIN32_IE 0x0500
 
+#include <stdio.h>
 #include <Windows.h>
 
 int main(int argc, char** argv) {
     if (argc != 3) {
         puts("notify-send.exe <title> <body>");
-        return;
+        return 1;
     }
 
     NOTIFYICONDATA nid;
