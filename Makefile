@@ -1,12 +1,6 @@
-# Makefile for notify-send
-CC=gcc
-
-all: notify-send.exe
-
 notify-send.exe: notify-send.c
-	gcc -o $@ $<
+	$(CC) -std=c99 -O2 -Wall -Werror -o $@ $<
 
 .PHONY: clean
-
 clean:
 	rm notify-send.exe

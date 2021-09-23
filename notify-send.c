@@ -1,25 +1,58 @@
-#define _WIN32_IE 0x0500
+#define WINVER 0x0500
 
 #include <stdio.h>
-#include <Windows.h>
+#include <windows.h>
 
-int main(int argc, char** argv) {
-    if (argc != 3) {
-        puts("notify-send.exe <title> <body>");
-        return 1;
-    }
+void usage()
+{
+	printf(
+			"notify-send.exe [OPTIONS] <title> <body>\n\n"
+			"OPTIONS:\n"
+			"\t-t        Notification type, one of: none, info, warning, error\n"
+	);
+	exit(1);
+}
 
-    NOTIFYICONDATA nid;
-    memset(&nid, 0, sizeof(nid));
-    nid.cbSize = sizeof(nid);
+int main(int argc, char **argv)
+{
+	if (argc < 3) {
+		usage();
+	}
 
-    nid.uFlags = NIF_INFO;
+	DWORD notifType = NIIF_NONE;
 
-    strcpy(nid.szInfoTitle, argv[1]);
-    strcpy(nid.szInfo, argv[2]);
+	for (int i = 1; i < argc - 2; i++) {
+		if (i + 3 >= argc) {
+			usage();
+		} else if (!strcmp(argv[i], "-t")) {
+			const char *type = argv[++i];
+			if (!strcmp(type, "none")) {
+				notifType = NIIF_NONE;
+			} else if (!strcmp(type, "info")) {
+				notifType = NIIF_INFO;
+			} else if (!strcmp(type, "warning")) {
+				notifType = NIIF_WARNING;
+			} else if (!strcmp(type, "error")) {
+				notifType = NIIF_ERROR;
+			} else {
+				usage();
+			}
+		} else {
+			usage();
+		}
+	}
 
-    Shell_NotifyIconA(NIM_ADD, &nid);
-    Shell_NotifyIconA(NIM_DELETE, &nid);
+	NOTIFYICONDATAA nid = {
+		.cbSize = sizeof(nid),
+		.uFlags = NIF_INFO,
+		.dwInfoFlags = notifType,
+	};
 
-    return 0;
+	strncpy(nid.szInfoTitle, argv[argc - 2], sizeof(nid.szInfoTitle) - 1);
+	strncpy(nid.szInfo, argv[argc - 1], sizeof(nid.szInfo) - 1);
+
+	Shell_NotifyIconA(NIM_ADD, &nid);
+	Shell_NotifyIconA(NIM_DELETE, &nid);
+
+	return 0;
 }
